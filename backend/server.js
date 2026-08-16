@@ -20,10 +20,10 @@ const app = express();
 // ── Security headers ──
 app.use(helmet());
 
-// ── CORS — locked to explicit allowlist ──
+// ── CORS — allow all origins or client origin ──
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: true,
     credentials: true,
   })
 );
@@ -37,6 +37,20 @@ app.use(mongoSanitize());
 // ── Rate limiters ──
 app.use('/api', generalLimiter);
 app.use('/api/auth', authLimiter);
+
+// ── Ensure DB Connection on each request in serverless environment ──
+let dbConnected = false;
+app.use(async (_req, _res, next) => {
+  if (!dbConnected) {
+    try {
+      await connectDB();
+      dbConnected = true;
+    } catch (e) {
+      console.error('DB connect error:', e.message);
+    }
+  }
+  next();
+});
 
 // ── Routes ──
 app.use('/api/auth', authRoutes);
@@ -53,12 +67,19 @@ app.get('/api/health', (_req, res) => {
 // ── Centralized error handler ──
 app.use(errorHandler);
 
-// ── Start ──
+// ── Start server when run directly (local / container) ──
 const PORT = process.env.PORT || 5000;
 
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`✓ Server running on port ${PORT}`);
-    startSLAMonitor();
+if (process.env.NODE_ENV !== 'test') {
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`✓ Server running on port ${PORT}`);
+      startSLAMonitor();
+    });
+  }).catch((err) => {
+    console.error('Failed to start server:', err.message);
   });
-});
+}
+
+// ── Export app for Vercel Serverless Function ──
+module.exports = app;
