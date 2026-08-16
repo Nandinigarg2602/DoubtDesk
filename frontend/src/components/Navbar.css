@@ -1,0 +1,75 @@
+/* ── Single Unified Global Navbar ── */
+.global-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px clamp(20px, 4vw, 48px);
+  background: rgba(4, 6, 10, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.global-navbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.global-navbar__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+.global-navbar__title {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.global-navbar__sub {
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
+
+.global-navbar__links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.global-navbar__link {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  padding: 0;
+}
+
+.global-navbar__link:hover {
+  color: #ffffff;
+}
+
+.global-navbar__logout {
+  color: var(--text-faint);
+}
+
+.global-navbar__logout:hover {
+  color: var(--status-open);
+}

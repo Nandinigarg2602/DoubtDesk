@@ -1,0 +1,82 @@
+.doubt-card {
+  display: block;
+  padding: var(--space-lg);
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  will-change: transform;
+  animation: fadeInUp 0.5s ease both;
+  position: relative;
+}
+
+.doubt-card:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.doubt-card--escalated {
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  background: linear-gradient(135deg, rgba(30, 10, 15, 0.85) 0%, rgba(10, 14, 25, 0.9) 100%) !important;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.15);
+}
+
+.sla-escalated-pill {
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #f87171;
+  font-weight: 700;
+  animation: pulse 1.5s infinite alternate;
+}
+
+.sla-timer-pill {
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
+.doubt-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+  gap: var(--space-sm);
+}
+
+.doubt-card__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: var(--space-sm);
+  line-height: 1.35;
+}
+
+.doubt-card__desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-md);
+}
+
+.doubt-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.doubt-card__author {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.doubt-card__time {
+  font-size: 0.6875rem;
+}

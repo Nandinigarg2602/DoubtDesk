@@ -1,0 +1,21 @@
+.particle-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.particle-glyph {
+  position: absolute;
+  top: -3vh;
+  font-family: var(--font-mono);
+  color: var(--accent);
+  opacity: 0;
+  animation: fallDown linear infinite;
+  will-change: transform, opacity;
+  user-select: none;
+}

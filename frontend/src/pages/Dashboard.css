@@ -1,0 +1,150 @@
+/* ── Dashboard Page ── */
+.dashboard {
+  padding-top: 100px;
+  padding-bottom: var(--space-3xl);
+  min-height: 100vh;
+}
+
+.dashboard__header {
+  margin-bottom: var(--space-xl);
+}
+
+.dashboard__title {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.dashboard__subtitle {
+  font-size: 1.05rem;
+  color: var(--text-dim);
+  max-width: 650px;
+}
+
+/* Stats */
+.dashboard__stats {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: var(--space-xl);
+  margin-bottom: var(--space-2xl);
+}
+
+.stat-divider {
+  width: 1px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Post form */
+.dashboard__post {
+  padding: var(--space-xl);
+  margin-bottom: var(--space-2xl);
+}
+
+.dashboard__post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.dashboard__section-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.dashboard__form-row {
+  display: flex;
+  gap: var(--space-md);
+}
+
+@media (max-width: 768px) {
+  .dashboard__form-row {
+    flex-direction: column;
+  }
+}
+
+/* Similar Doubts Box */
+.similar-doubts-box {
+  margin-bottom: var(--space-md);
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.similar-doubts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.similar-doubt-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.3);
+  transition: background 0.2s ease;
+}
+
+.similar-doubt-item:hover {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+.similar-doubt-title {
+  font-size: 0.85rem;
+  color: #e2e8f0;
+}
+
+/* Doubts list */
+.dashboard__list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.dashboard__filter {
+  width: auto;
+  min-width: 180px;
+}
+
+.dashboard__doubts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.dashboard__doubt-wrapper {
+  position: relative;
+}
+
+.dashboard__card-action {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 2;
+}
+
+.dashboard__empty {
+  padding: var(--space-3xl) var(--space-xl);
+}
+
+@media (max-width: 600px) {
+  .dashboard__stats {
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+  .stat-divider {
+    display: none;
+  }
+}

@@ -1,0 +1,19 @@
+.stat-counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-counter__value {
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.stat-counter__label {
+  font-size: 0.6875rem;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}

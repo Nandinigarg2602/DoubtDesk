@@ -1,0 +1,19 @@
+.reveal-text {
+  overflow: hidden;
+}
+
+.reveal-text__word-wrap {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.reveal-text__word {
+  display: inline-block;
+  transform: translateY(110%);
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-text--active .reveal-text__word {
+  transform: translateY(0);
+}

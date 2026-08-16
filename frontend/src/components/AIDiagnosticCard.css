@@ -1,0 +1,231 @@
+/* ── AI Diagnostic Card ── */
+.ai-card {
+  margin: var(--space-xl) 0;
+  padding: var(--space-lg);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  background: linear-gradient(180deg, rgba(20, 15, 35, 0.88) 0%, rgba(10, 14, 25, 0.85) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #a855f7 0%, #3b82f6 50%, #10b981 100%);
+}
+
+.ai-card--loading {
+  padding: var(--space-xl);
+}
+
+.ai-card__loading-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ai-pulse-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #a855f7;
+  box-shadow: 0 0 12px #a855f7;
+  animation: pulse 1s infinite alternate;
+}
+
+.ai-loading-text {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e9d5ff;
+}
+
+/* Header */
+.ai-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.ai-card__title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ai-card__model-tag {
+  font-size: 0.75rem;
+  color: #a855f7;
+}
+
+.btn-ai-outline {
+  border-color: rgba(168, 85, 247, 0.4);
+  color: #d8b4fe;
+  background: rgba(168, 85, 247, 0.1);
+}
+
+.btn-ai-outline:hover {
+  background: rgba(168, 85, 247, 0.2);
+  border-color: #c084fc;
+}
+
+/* Tabs */
+.ai-card__tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: var(--space-md);
+  padding-bottom: 8px;
+  overflow-x: auto;
+}
+
+.ai-tab {
+  font-family: var(--font-heading);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.ai-tab:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ai-tab--active {
+  color: #ffffff;
+  background: rgba(168, 85, 247, 0.2);
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+/* Content */
+.ai-diff-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+@media (max-width: 768px) {
+  .ai-diff-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ai-diff-pane {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(15, 10, 15, 0.6);
+}
+
+.ai-diff-pane--after {
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(10, 20, 18, 0.6);
+}
+
+.ai-diff-label {
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  font-weight: 600;
+}
+
+.ai-diff-label--fixed {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.ai-code-block {
+  padding: 12px 14px;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: #fca5a5;
+  overflow-x: auto;
+}
+
+.ai-code-block--fixed {
+  color: #6ee7b7;
+}
+
+/* Root Cause Tab */
+.ai-root-content {
+  padding: 8px 0;
+}
+
+.ai-root-title {
+  font-size: 1.05rem;
+  color: #ffffff;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.ai-root-explanation {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* Suggestions Tab */
+.ai-suggestions-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.ai-suggestion-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.ai-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(168, 85, 247, 0.25);
+  color: #d8b4fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Footer */
+.ai-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.ai-footer-note {
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
