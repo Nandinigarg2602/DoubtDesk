@@ -76,49 +76,6 @@ doubtdesk/
 
 ---
 
-## 🌐 Deployment Configuration (Vercel & Cloud)
-
-### Environment Variables
-
-Configure the following environment variables in your deployment dashboard:
-
-#### Backend Environment Variables:
-```env
-PORT=5000
-NODE_ENV=production
-JWT_SECRET=your_production_jwt_secret_key
-MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/doubtdesk
-CLIENT_ORIGIN=https://your-frontend-domain.vercel.app
-# Optional: Google Gemini API Key for deep LLM reasoning
-GEMINI_API_KEY=your_gemini_api_key_here
-```
-
-#### Frontend Environment Variables:
-```env
-VITE_API_URL=https://your-backend-api.vercel.app/api
-```
-
----
-
-## 📡 API Endpoints Overview
-
-| Method | Endpoint | Description | Access |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/signup` | Register new student or mentor | Public |
-| `POST` | `/api/auth/login` | Sign in & receive JWT token | Public |
-| `GET` | `/api/doubts` | Get doubts (Student: own, Mentor: all) | Private |
-| `POST` | `/api/doubts` | Submit new doubt ticket | Student |
-| `PUT` | `/api/doubts/:id/assign` | Claim doubt ticket | Mentor |
-| `PUT` | `/api/doubts/:id/propose-resolution` | Propose solution for student review | Mentor |
-| `PUT` | `/api/doubts/:id/verify-resolution` | Student sign-off (Accept or Reject) | Student |
-| `POST` | `/api/responses/:id` | Post thread response | Private |
-| `POST` | `/api/ai/chat` | 24/7 AI DoubtBot conversation | Student |
-| `POST` | `/api/ai/analyze` | AI code diff & root cause diagnosis | Private |
-| `GET` | `/api/faq` | Search self-growing Knowledge Base | Private |
-| `POST` | `/api/faq/:id/helpful` | Upvote FAQ solution | Private |
-
----
-
 ## 👨‍💻 Author & Internship Credits
 
 - **Project:** DoubtDesk
