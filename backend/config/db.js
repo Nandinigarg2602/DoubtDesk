@@ -1,10 +1,18 @@
 const mongoose = require('mongoose');
+const dns = require('dns');
+
+// Configure reliable DNS servers (Google + Cloudflare) for Atlas SRV resolution
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch (e) {
+  // Ignore in environments where setServers is restricted
+}
 
 const connectDB = async () => {
   const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/doubtdesk';
   try {
     const conn = await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 4000,
+      serverSelectionTimeoutMS: 8000,
     });
     console.log(`✓ MongoDB connected: ${conn.connection.host}`);
   } catch (err) {
