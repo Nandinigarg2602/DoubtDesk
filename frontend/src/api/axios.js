@@ -1,7 +1,8 @@
 import axios from 'axios';
 
+// Use configured environment variable or default to live Render backend
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://doubtdesk-rbd1.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -26,7 +27,6 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('dd_token');
       localStorage.removeItem('dd_user');
-      // Only redirect if not already on an auth page
       if (
         !window.location.pathname.includes('/login') &&
         !window.location.pathname.includes('/signup')
