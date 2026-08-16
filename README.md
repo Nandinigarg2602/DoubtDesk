@@ -76,49 +76,27 @@ doubtdesk/
 
 ---
 
-## 🛠️ Getting Started Locally
+## 🌐 Deployment Configuration (Vercel & Cloud)
 
-### Prerequisites
-- Node.js (v18+)
-- npm or yarn
+### Environment Variables
 
-### 1. Clone Repository
-```bash
-git clone <your-github-repo-url>
-cd doubtdesk
-```
+Configure the following environment variables in your deployment dashboard:
 
-### 2. Backend Setup
-```bash
-cd backend
-npm install
-```
-
-Create a `.env` file in `backend/`:
+#### Backend Environment Variables:
 ```env
 PORT=5000
-NODE_ENV=development
-JWT_SECRET=your_super_secret_jwt_key_here_change_in_production
-MONGO_URI=mongodb://127.0.0.1:27017/doubtdesk
-CLIENT_ORIGIN=http://localhost:5173
-# Optional: Add Google Gemini API key for live Gemini 1.5 Flash reasoning
-GEMINI_API_KEY=
+NODE_ENV=production
+JWT_SECRET=your_production_jwt_secret_key
+MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/doubtdesk
+CLIENT_ORIGIN=https://your-frontend-domain.vercel.app
+# Optional: Google Gemini API Key for deep LLM reasoning
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
-Start the backend:
-```bash
-npm run dev
+#### Frontend Environment Variables:
+```env
+VITE_API_URL=https://your-backend-api.vercel.app/api
 ```
-
-### 3. Frontend Setup
-In a new terminal:
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Open **`http://localhost:5173`** in your browser.
 
 ---
 
