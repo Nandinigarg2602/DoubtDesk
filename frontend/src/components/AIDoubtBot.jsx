@@ -18,19 +18,17 @@ export default function AIDoubtBot() {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Initialize welcome message with student name
+  // Initialize welcome message
   useEffect(() => {
-    if (user && user.role === 'student') {
-      const studentName = user.name ? user.name.split(' ')[0] : 'Student';
-      setMessages([
-        {
-          id: 'init-1',
-          sender: 'bot',
-          text: `Hello ${studentName}! 👋 I am **DoubtBot**, your 24/7 AI Coding Mentor at CodingMates.\n\nAsk me any React, Express, Node.js, or MongoDB questions, paste your broken code snippets, or pick a quick prompt below to get started!`,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        },
-      ]);
-    }
+    const studentName = user?.name ? user.name.split(' ')[0] : 'Developer';
+    setMessages([
+      {
+        id: 'init-1',
+        sender: 'bot',
+        text: `Hello ${studentName}! 👋 I am **DoubtBot**, your 24/7 AI Coding Mentor at CodingMates.\n\nAsk me any React, Express, Node.js, or MongoDB questions, paste your broken code snippets, or pick a quick prompt below to get started!`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    ]);
   }, [user]);
 
   const scrollToBottom = () => {
@@ -42,11 +40,6 @@ export default function AIDoubtBot() {
       scrollToBottom();
     }
   }, [messages, isOpen]);
-
-  // Exclusively for authenticated students only: NOT available before login or to mentors
-  if (!user || user.role !== 'student') {
-    return null;
-  }
 
   const handleSendMessage = async (textToSend) => {
     const query = textToSend || input;
@@ -209,7 +202,7 @@ export default function AIDoubtBot() {
               >
                 <div className="doubtbot-msg__header">
                   <span className="doubtbot-msg__name mono">
-                    {msg.sender === 'bot' ? '✨ DoubtBot' : user.name}
+                    {msg.sender === 'bot' ? '✨ DoubtBot' : (user?.name || 'Developer')}
                   </span>
                   <span className="doubtbot-msg__time faint mono">{msg.timestamp}</span>
                 </div>

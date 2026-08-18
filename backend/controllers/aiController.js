@@ -30,9 +30,9 @@ function generateHeuristicAnalysis(title, subject, description) {
     ];
   } else if (combined.includes('cors') || combined.includes('access-control')) {
     rootCause = 'Cross-Origin Resource Sharing (CORS) header missing on backend.';
-    explanation = 'The browser blocks frontend requests from http://localhost:5173 to http://localhost:5000 because the Express API has not set the Access-Control-Allow-Origin header.';
+    explanation = 'The browser blocks frontend requests from http://localhost:5173 or Vercel to http://localhost:5000 / Render because the Express API has not set the Access-Control-Allow-Origin header.';
     beforeCode = `// ❌ Backend server.js without CORS configuration\nconst express = require('express');\nconst app = express();`;
-    afterCode = `// ✅ Fix: Enable CORS middleware with origin whitelist\nconst cors = require('cors');\napp.use(cors({\n  origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',\n  credentials: true\n}));`;
+    afterCode = `// ✅ Fix: Enable CORS middleware with origin whitelist\nconst cors = require('cors');\napp.use(cors({\n  origin: true,\n  credentials: true\n}));`;
     suggestions = [
       'Install cors package: npm install cors',
       'Mount cors() middleware before defining any API routes.',
@@ -42,7 +42,7 @@ function generateHeuristicAnalysis(title, subject, description) {
     rootCause = 'Authorization Bearer header missing, malformed, or expired.';
     explanation = 'The request to protected API routes requires a valid JWT Bearer token in the HTTP Authorization header.';
     beforeCode = `// ❌ Axios request without token attachment\nconst res = await axios.get('/api/doubts');`;
-    afterCode = `// ✅ Fix: Attach Bearer token from localStorage/state\nconst token = localStorage.getItem('token');\nconst res = await axios.get('/api/doubts', {\n  headers: { Authorization: \`Bearer \${token}\` }\n});`;
+    afterCode = `// ✅ Fix: Attach Bearer token from localStorage/state\nconst token = localStorage.getItem('dd_token');\nconst res = await axios.get('/api/doubts', {\n  headers: { Authorization: \`Bearer \${token}\` }\n});`;
     suggestions = [
       'Use an Axios request interceptor to attach JWT automatically.',
       'Check if token has expired and implement refresh logic.',
@@ -139,7 +139,7 @@ async function callGeminiAPI(prompt, isChat = false) {
 /**
  * @route   POST /api/ai/analyze
  * @desc    Analyze a doubt title, subject, and description to generate root cause & fix
- * @access  Private (Students only)
+ * @access  Private
  */
 exports.analyzeDoubt = async (req, res) => {
   try {
@@ -181,25 +181,20 @@ Return strictly valid JSON with this schema:
 
 /**
  * @route   POST /api/ai/chat
- * @desc    Interactive 24/7 AI DoubtBot & Code Tutor (Exclusively for Students)
- * @access  Private (Students only)
+ * @desc    Interactive 24/7 AI DoubtBot & Code Tutor
+ * @access  Public / Optional Auth
  */
 exports.chatWithBot = async (req, res) => {
   try {
-    // Mentors should not access student AI tutor
-    if (req.user?.role !== 'student') {
-      return res.status(403).json({ message: 'AI DoubtBot is exclusively available for student learning.' });
-    }
-
     const { message } = req.body;
     if (!message || !message.trim()) {
       return res.status(400).json({ message: 'Message content is required' });
     }
 
-    const userName = req.user?.name?.split(' ')[0] || 'Student';
+    const userName = req.user?.name?.split(' ')[0] || 'Developer';
 
     const prompt = `You are "DoubtBot", an expert Senior AI Coding Mentor at CodingMates (OPC) Pvt. Ltd. bootcamp ("Learn Today, Lead Tomorrow.").
-User: ${userName} (student)
+User: ${userName}
 User Query: "${message}"
 
 Your Goal: Provide a friendly, clear, step-by-step technical explanation with clean formatted code examples. If there's a bug, explain WHY it happens and provide the clean fix. Keep answers structured, insightful, and encouraging.`;
@@ -219,11 +214,11 @@ Your Goal: Provide a friendly, clear, step-by-step technical explanation with cl
     if (q.includes('useeffect') || q.includes('hook') || q.includes('re-render')) {
       reply += `### 💡 React \`useEffect\` Best Practice\n\nWhen fetching data in React, always guard against infinite loops by specifying clean dependencies:\n\n\`\`\`javascript\nuseEffect(() => {\n  let isMounted = true;\n\n  async function loadData() {\n    try {\n      const res = await api.get('/doubts');\n      if (isMounted) setDoubts(res.data);\n    } catch (err) {\n      console.error(err);\n    }\n  }\n\n  loadData();\n  return () => { isMounted = false; };\n}, []); // Empty array = run once on mount\n\`\`\`\n\n**Key takeaway**: Never mutate a state variable inside \`useEffect\` if that same variable is in the dependency array!`;
     } else if (q.includes('jwt') || q.includes('auth') || q.includes('token') || q.includes('401')) {
-      reply += `### 🔒 JWT Authentication in MERN\n\n1. **Sign on Login**: The backend generates a token with \`jwt.sign({ id: user._id }, SECRET, { expiresIn: '7d' })\`.\n2. **Store on Client**: Save in \`localStorage.setItem('token', token)\`.\n3. **Attach via Axios Interceptor**:\n\`\`\`javascript\napi.interceptors.request.use((config) => {\n  const token = localStorage.getItem('token');\n  if (token) config.headers.Authorization = \`Bearer \${token}\`;\n  return config;\n});\n\`\`\`\n\n4. **Verify on Server**: \`jwt.verify(token, SECRET)\` in your \`protect\` middleware.`;
-    } else if (q.includes('mongo') || q.includes('mongoose') || q.includes('schema')) {
+      reply += `### 🔒 JWT Authentication in MERN\n\n1. **Sign on Login**: The backend generates a token with \`jwt.sign({ id: user._id }, SECRET, { expiresIn: '7d' })\`.\n2. **Store on Client**: Save in \`localStorage.setItem('dd_token', token)\`.\n3. **Attach via Axios Interceptor**:\n\`\`\`javascript\napi.interceptors.request.use((config) => {\n  const token = localStorage.getItem('dd_token');\n  if (token) config.headers.Authorization = \`Bearer \${token}\`;\n  return config;\n});\n\`\`\`\n\n4. **Verify on Server**: \`jwt.verify(token, SECRET)\` in your \`protect\` middleware.`;
+    } else if (q.includes('mongo') || q.includes('mongoose') || q.includes('schema') || q.includes('casterror')) {
       reply += `### 🍃 MongoDB & Mongoose Schema Design\n\nIn DoubtDesk, we link models using \`ObjectId\` references for relational lookups:\n\n\`\`\`javascript\nconst doubtSchema = new mongoose.Schema({\n  title: { type: String, required: true },\n  student: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },\n  assignedMentor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },\n  status: { type: String, enum: ['Open', 'In Progress', 'Resolved'], default: 'Open' }\n}, { timestamps: true });\n\`\`\`\n\nQuery with \`.populate('student', 'name email')\` to fetch user details automatically!`;
-    } else if (q.includes('cors') || q.includes('network') || q.includes('5000') || q.includes('5173')) {
-      reply += `### 🌐 Fixing CORS in Express + Vite\n\nEnable CORS on your Express backend with credentials allowed:\n\n\`\`\`javascript\nconst cors = require('cors');\n\napp.use(cors({\n  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],\n  credentials: true\n}));\n\`\`\`\n\nIn Vite (\`vite.config.js\`), set up a proxy to forward \`/api\` requests directly to \`http://127.0.0.1:5000\`.`;
+    } else if (q.includes('cors') || q.includes('network') || q.includes('5000') || q.includes('5173') || q.includes('vercel')) {
+      reply += `### 🌐 Fixing CORS in Express + Vite + Vercel\n\nEnable CORS on your Express backend with credentials allowed:\n\n\`\`\`javascript\nconst cors = require('cors');\n\napp.use(cors({\n  origin: true,\n  credentials: true\n}));\n\`\`\`\n\nIn your Vite frontend (\`axios.js\`), point the base URL to your live Render backend (\`https://doubtdesk-rbd1.onrender.com/api\`).`;
     } else {
       reply += `Here is a structured breakdown for **"${message}"**:\n\n1. **Core Concept**: In modern web development, ensure clean separation of concerns between your frontend UI state and backend database queries.\n2. **Debugging Strategy**: Check your browser Console ($F12$) for network status codes ($200$, $400$, $401$, $500$) to isolate if the issue is client-side or server-side.\n3. **Need a Mentor?**: You can also post this as an official doubt ticket on the Dashboard, and our CodingMates senior mentors will review it in a dedicated thread!`;
     }
@@ -241,7 +236,7 @@ Your Goal: Provide a friendly, clear, step-by-step technical explanation with cl
 /**
  * @route   POST /api/ai/explain
  * @desc    In-thread AI action (explain simply, generate test cases, optimize)
- * @access  Private (Students only)
+ * @access  Private
  */
 exports.explainCode = async (req, res) => {
   try {

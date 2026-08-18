@@ -34,6 +34,30 @@ const protect = async (req, res, next) => {
 };
 
 /**
+ * Optional Auth — attaches req.user if valid token provided, but doesn't block guests.
+ */
+const optionalAuth = async (req, res, next) => {
+  try {
+    let token;
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith('Bearer')
+    ) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (token) {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id);
+      if (user) req.user = user;
+    }
+  } catch (err) {
+    // Graceful fallback for unauthenticated callers
+  }
+  next();
+};
+
+/**
  * Role-based access control.
  * Usage: allowRoles('mentor', 'admin')
  */
@@ -48,4 +72,4 @@ const allowRoles = (...roles) => {
   };
 };
 
-module.exports = { protect, allowRoles };
+module.exports = { protect, optionalAuth, allowRoles };

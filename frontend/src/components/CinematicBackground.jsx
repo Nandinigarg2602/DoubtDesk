@@ -4,11 +4,7 @@ import './CinematicBackground.css';
 
 /**
  * CinematicBackground — Spatial Scrollytelling Portal
- * Tightly choreographed with the page scroll progress:
- * - 0% to 25%: Wide atmospheric view (The Threshold)
- * - 25% to 55%: Camera moves forward into the light beam (The Tunnel)
- * - 55% to 80%: Deep volumetric immersion with glowing spatial core (The Engine)
- * - 80% to 100%: Traversing through the doorway (The Resolution)
+ * Luminous monolithic doorway animation that zooms, rotates, and illuminates in sync with page scroll.
  */
 export default function CinematicBackground({ scrollProgress = 0 }) {
   const containerRef = useRef(null);
@@ -20,6 +16,16 @@ export default function CinematicBackground({ scrollProgress = 0 }) {
   useEffect(() => {
     mouseTarget.current = normalized;
   }, [normalized]);
+
+  // Ensure autoplay on all browsers
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = true;
+      videoRef.current.play().catch(() => {
+        // Autoplay policy fallback
+      });
+    }
+  }, []);
 
   useEffect(() => {
     let frameId;
@@ -36,11 +42,11 @@ export default function CinematicBackground({ scrollProgress = 0 }) {
 
       if (containerRef.current) {
         // Continuous spatial camera kinematics:
-        // 1. Scale zooms into the portal as you scroll down (from 1.0 to 1.75)
-        const scale = 1.0 + sp * 0.75;
+        // 1. Scale zooms into the portal as you scroll down (from 1.0 to 1.85)
+        const scale = 1.0 + sp * 0.85;
         // 2. Parallax camera tilt combined with vertical trajectory
         const translateX = mx * 20 - sp * 15;
-        const translateY = my * 15 + sp * 80;
+        const translateY = my * 15 + sp * 70;
         // 3. Subtle 3D perspective rotation
         const rotateY = mx * 3;
         const rotateX = -my * 2;
@@ -49,7 +55,6 @@ export default function CinematicBackground({ scrollProgress = 0 }) {
       }
 
       if (videoRef.current) {
-        // Subtle brightness boost as you get closer to the luminous light
         const brightness = 0.95 + sp * 0.25;
         const contrast = 1.05 + sp * 0.1;
         videoRef.current.style.filter = `contrast(${contrast}) brightness(${brightness})`;
@@ -72,19 +77,20 @@ export default function CinematicBackground({ scrollProgress = 0 }) {
           muted
           playsInline
           preload="auto"
+          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260808_112712_da9d53df-6d27-4b12-bdf6-aa9dc2622bdf.mp4"
         >
-          <source src="/assets/cinematic_portal.mp4" type="video/mp4" />
           <source
             src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260808_112712_da9d53df-6d27-4b12-bdf6-aa9dc2622bdf.mp4"
             type="video/mp4"
           />
+          <source src="/assets/cinematic_portal.mp4" type="video/mp4" />
         </video>
       </div>
 
       {/* Spatial Light Flares & Vignette Blends */}
       <div
         className="cinematic-bg__light-shaft"
-        style={{ opacity: 0.3 + scrollProgress * 0.5 }}
+        style={{ opacity: 0.35 + scrollProgress * 0.45 }}
       />
       <div className="cinematic-bg__vignette" />
       <div className="cinematic-bg__ground-fog" />

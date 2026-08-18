@@ -6,11 +6,11 @@ const {
   explainCode,
   getSimilarDoubts,
 } = require('../controllers/aiController');
-const { protect } = require('../middleware/auth');
+const { protect, optionalAuth } = require('../middleware/auth');
 
-// Protected AI endpoints
+// Protected & open AI endpoints
 router.post('/analyze', protect, analyzeDoubt);
-router.post('/chat', protect, chatWithBot);
+router.post('/chat', optionalAuth, chatWithBot);
 router.post('/explain', protect, explainCode);
 router.get('/similar', protect, getSimilarDoubts);
 
