@@ -139,7 +139,7 @@ async function callGeminiAPI(prompt, isChat = false) {
 /**
  * @route   POST /api/ai/analyze
  * @desc    Analyze a doubt title, subject, and description to generate root cause & fix
- * @access  Private
+ * @access  Private (Students only)
  */
 exports.analyzeDoubt = async (req, res) => {
   try {
@@ -181,20 +181,25 @@ Return strictly valid JSON with this schema:
 
 /**
  * @route   POST /api/ai/chat
- * @desc    Interactive 24/7 AI DoubtBot & Code Tutor
- * @access  Public / Optional Auth
+ * @desc    Interactive 24/7 AI DoubtBot & Code Tutor (Exclusively for Students)
+ * @access  Private (Students only)
  */
 exports.chatWithBot = async (req, res) => {
   try {
+    // Strictly available for students only
+    if (req.user?.role !== 'student') {
+      return res.status(403).json({ message: 'DoubtBot is exclusively available on the Student Dashboard.' });
+    }
+
     const { message } = req.body;
     if (!message || !message.trim()) {
       return res.status(400).json({ message: 'Message content is required' });
     }
 
-    const userName = req.user?.name?.split(' ')[0] || 'Developer';
+    const userName = req.user?.name?.split(' ')[0] || 'Student';
 
     const prompt = `You are "DoubtBot", an expert Senior AI Coding Mentor at CodingMates (OPC) Pvt. Ltd. bootcamp ("Learn Today, Lead Tomorrow.").
-User: ${userName}
+User: ${userName} (student)
 User Query: "${message}"
 
 Your Goal: Provide a friendly, clear, step-by-step technical explanation with clean formatted code examples. If there's a bug, explain WHY it happens and provide the clean fix. Keep answers structured, insightful, and encouraging.`;
@@ -236,7 +241,7 @@ Your Goal: Provide a friendly, clear, step-by-step technical explanation with cl
 /**
  * @route   POST /api/ai/explain
  * @desc    In-thread AI action (explain simply, generate test cases, optimize)
- * @access  Private
+ * @access  Private (Students only)
  */
 exports.explainCode = async (req, res) => {
   try {

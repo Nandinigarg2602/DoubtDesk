@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import './AIDoubtBot.css';
@@ -12,23 +13,27 @@ const QUICK_PROMPTS = [
 
 export default function AIDoubtBot() {
   const { user } = useAuth();
+  const location = useLocation();
+
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Initialize welcome message
+  // Initialize welcome message for student
   useEffect(() => {
-    const studentName = user?.name ? user.name.split(' ')[0] : 'Developer';
-    setMessages([
-      {
-        id: 'init-1',
-        sender: 'bot',
-        text: `Hello ${studentName}! 👋 I am **DoubtBot**, your 24/7 AI Coding Mentor at CodingMates.\n\nAsk me any React, Express, Node.js, or MongoDB questions, paste your broken code snippets, or pick a quick prompt below to get started!`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      },
-    ]);
+    if (user && user.role === 'student') {
+      const studentName = user.name ? user.name.split(' ')[0] : 'Student';
+      setMessages([
+        {
+          id: 'init-1',
+          sender: 'bot',
+          text: `Hello ${studentName}! 👋 I am **DoubtBot**, your 24/7 AI Coding Mentor at CodingMates.\n\nAsk me any React, Express, Node.js, or MongoDB questions, paste your broken code snippets, or pick a quick prompt below to get started!`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+      ]);
+    }
   }, [user]);
 
   const scrollToBottom = () => {
@@ -40,6 +45,12 @@ export default function AIDoubtBot() {
       scrollToBottom();
     }
   }, [messages, isOpen]);
+
+  // STRICT REQUIREMENT: ONLY show to logged-in students on the Student Dashboard
+  // Hidden completely on Landing Page, Login, Signup, for Mentors, and all other routes
+  if (!user || user.role !== 'student' || location.pathname !== '/dashboard') {
+    return null;
+  }
 
   const handleSendMessage = async (textToSend) => {
     const query = textToSend || input;
@@ -151,7 +162,7 @@ export default function AIDoubtBot() {
 
   return (
     <div className="doubtbot-root" aria-live="polite">
-      {/* Floating Trigger Button */}
+      {/* Floating Trigger Button on Student Dashboard */}
       {!isOpen && (
         <button
           type="button"
@@ -202,7 +213,7 @@ export default function AIDoubtBot() {
               >
                 <div className="doubtbot-msg__header">
                   <span className="doubtbot-msg__name mono">
-                    {msg.sender === 'bot' ? '✨ DoubtBot' : (user?.name || 'Developer')}
+                    {msg.sender === 'bot' ? '✨ DoubtBot' : user.name}
                   </span>
                   <span className="doubtbot-msg__time faint mono">{msg.timestamp}</span>
                 </div>
