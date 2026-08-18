@@ -76,7 +76,105 @@ function generateUniversalTechResponse(message, userName) {
 }
 
 /**
- * Call Gemini API if GEMINI_API_KEY is available in environment
+ * Call OpenRouter API with a free model, with automatic fallback across free model pool
+ */
+async function callOpenRouterAPI(prompt, isChat = false, systemPrompt = '') {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) return null;
+
+  const configuredModel = process.env.OPENROUTER_MODEL || 'google/gemma-4-26b-a4b-it:free';
+  const candidateModels = [
+    configuredModel,
+    'google/gemma-4-26b-a4b-it:free',
+    'nvidia/nemotron-3.5-lightning:free',
+    'cohere/north-mini-code:free',
+  ];
+
+  const uniqueModels = [...new Set(candidateModels)];
+
+  const makeRequest = (model) => {
+    return new Promise((resolve) => {
+      const messages = [];
+      if (systemPrompt) {
+        messages.push({ role: 'system', content: systemPrompt });
+      }
+      messages.push({ role: 'user', content: prompt });
+
+      const postData = JSON.stringify({
+        model: model,
+        messages: messages,
+        temperature: isChat ? 0.7 : 0.2,
+      });
+
+      const options = {
+        hostname: 'openrouter.ai',
+        path: '/api/v1/chat/completions',
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'HTTP-Referer': process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+          'X-Title': 'DoubtDesk',
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(postData),
+        },
+        timeout: 10000,
+      };
+
+      const req = https.request(options, (res) => {
+        let data = '';
+        res.on('data', (chunk) => { data += chunk; });
+        res.on('end', () => {
+          if (res.statusCode !== 200) {
+            resolve(null);
+            return;
+          }
+          try {
+            const parsed = JSON.parse(data);
+            const rawText = parsed?.choices?.[0]?.message?.content;
+            if (!rawText) {
+              resolve(null);
+              return;
+            }
+
+            if (isChat) {
+              resolve({ reply: rawText, model: parsed?.model || model });
+            } else {
+              let cleaned = rawText.trim();
+              const jsonBlockMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+              if (jsonBlockMatch) {
+                cleaned = jsonBlockMatch[1];
+              }
+              try {
+                const jsonObj = JSON.parse(cleaned);
+                jsonObj.model = parsed?.model || model;
+                resolve(jsonObj);
+              } catch {
+                resolve(null);
+              }
+            }
+          } catch {
+            resolve(null);
+          }
+        });
+      });
+
+      req.on('error', () => resolve(null));
+      req.on('timeout', () => { req.destroy(); resolve(null); });
+      req.write(postData);
+      req.end();
+    });
+  };
+
+  for (const model of uniqueModels) {
+    const result = await makeRequest(model);
+    if (result) return result;
+  }
+
+  return null;
+}
+
+/**
+ * Call direct Gemini API if GEMINI_API_KEY is available in environment
  */
 async function callGeminiAPI(prompt, isChat = false) {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -96,7 +194,7 @@ async function callGeminiAPI(prompt, isChat = false) {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(postData),
       },
-      timeout: 6000,
+      timeout: 8000,
     };
 
     const req = https.request(options, (res) => {
@@ -108,9 +206,11 @@ async function callGeminiAPI(prompt, isChat = false) {
           const text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
           if (text) {
             if (isChat) {
-              resolve({ reply: text });
+              resolve({ reply: text, model: 'Gemini 1.5 Flash' });
             } else {
-              resolve(JSON.parse(text));
+              const obj = JSON.parse(text);
+              obj.model = 'Gemini 1.5 Flash';
+              resolve(obj);
             }
           } else {
             resolve(null);
@@ -126,6 +226,23 @@ async function callGeminiAPI(prompt, isChat = false) {
     req.write(postData);
     req.end();
   });
+}
+
+/**
+ * Unified LLM caller: OpenRouter (Gemini Free) -> Direct Gemini API -> Fallback
+ */
+async function callLLM(prompt, isChat = false, systemPrompt = '') {
+  if (process.env.OPENROUTER_API_KEY) {
+    const res = await callOpenRouterAPI(prompt, isChat, systemPrompt);
+    if (res) return res;
+  }
+
+  if (process.env.GEMINI_API_KEY) {
+    const res = await callGeminiAPI(prompt, isChat);
+    if (res) return res;
+  }
+
+  return null;
 }
 
 // ── Controller Handlers ──
@@ -159,9 +276,9 @@ Return strictly valid JSON with this schema:
   "model": "Gemini 1.5 Flash"
 }`;
 
-    const geminiResult = await callGeminiAPI(prompt, false);
-    if (geminiResult && geminiResult.rootCause) {
-      return res.json(geminiResult);
+    const llmResult = await callLLM(prompt, false);
+    if (llmResult && llmResult.rootCause) {
+      return res.json(llmResult);
     }
 
     const heuristic = {
@@ -202,17 +319,14 @@ exports.chatWithBot = async (req, res) => {
 
     const userName = req.user?.name?.split(' ')[0] || 'Student';
 
-    const prompt = `You are "DoubtBot", an expert Senior AI Coding Mentor at CodingMates (OPC) Pvt. Ltd. bootcamp ("Learn Today, Lead Tomorrow.").
-User: ${userName} (student)
-User Query: "${message}"
+    const systemPrompt = `You are "DoubtBot", an expert Senior AI Coding Mentor at CodingMates bootcamp. Provide a friendly, clear, step-by-step technical explanation with clean code examples in Markdown. If there's a bug, explain WHY it happens and provide the clean fix.`;
+    const prompt = `User (${userName}): ${message}`;
 
-Your Goal: Provide a friendly, clear, comprehensive step-by-step technical explanation with clean formatted code examples. If there's a bug, explain WHY it happens and provide the clean fix. Keep answers structured, insightful, and encouraging.`;
-
-    const geminiResult = await callGeminiAPI(prompt, true);
-    if (geminiResult && geminiResult.reply) {
+    const llmResult = await callLLM(prompt, true, systemPrompt);
+    if (llmResult && llmResult.reply) {
       return res.json({
-        reply: geminiResult.reply,
-        model: 'Gemini 1.5 Flash',
+        reply: llmResult.reply,
+        model: llmResult.model || 'Gemini (OpenRouter)',
       });
     }
 
@@ -241,6 +355,25 @@ exports.explainCode = async (req, res) => {
       return res.status(400).json({ message: 'Message content is required' });
     }
 
+    let prompt = '';
+    if (action === 'test-cases') {
+      prompt = `Generate comprehensive unit test cases (e.g. Jest / Mocha) for the following code or doubt context:\n\n${message}`;
+    } else if (action === 'optimize') {
+      prompt = `Analyze the time and space complexity and provide an optimized solution with best practices for:\n\n${message}`;
+    } else {
+      prompt = `Explain this coding doubt or concept in simple, easy-to-understand terms (ELI5 - Explain Like I'm 5) with an intuitive analogy and clear takeaways:\n\n${message}`;
+    }
+
+    const systemPrompt = `You are an elite coding mentor. Output clean Markdown responses.`;
+    const llmResult = await callLLM(prompt, true, systemPrompt);
+    if (llmResult && llmResult.reply) {
+      return res.json({
+        reply: llmResult.reply,
+        model: llmResult.model || 'Gemini (OpenRouter)',
+      });
+    }
+
+    // Fallbacks
     if (action === 'test-cases') {
       return res.json({
         reply: `### 🧪 AI Generated Test Cases\n\n\`\`\`javascript\ndescribe('${action || 'Functionality'}', () => {\n  test('handles valid input correctly', async () => {\n    const result = await executeAction({ valid: true });\n    expect(result).toBeDefined();\n  });\n\n  test('handles null/undefined edge cases without crashing', () => {\n    expect(() => executeAction(null)).not.toThrow();\n  });\n});\n\`\`\`\n\n*Generated by DoubtDesk AI Co-Pilot*`,
